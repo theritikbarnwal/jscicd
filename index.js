@@ -1,17 +1,17 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 
-(async () => {
-    const browser = await chromium.launch({ headless: true });
-    const page = await browser.newPage();
+// Scrape Jobs function
+async function scrapeJobs() {
     const jobs = [];
     const baseUrl = "https://careers.servicenow.com/jobs/";
-
     const experienceRegex = /\b(?:at least\s*\d+\+?\s*years?|minimum\s*\d+\+?\s*years?|\d+\+?\s*years?|one year|two years?|three years?|four years?|five years?|six years?|seven years?|eight years?|nine years?|ten years?)\b/gi;
 
     for (let pageNum = 1; pageNum <= 2; pageNum++) {
         const url = `${baseUrl}?page=${pageNum}#results`;
         try {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage();
             await page.goto(url, { waitUntil: 'domcontentloaded' });
 
             await page.waitForFunction(() => {
@@ -70,15 +70,25 @@ const fs = require('fs');
             }
 
             console.log(`Scraped page ${pageNum}`);
+            await browser.close();
         } catch (err) {
             console.log(`Failed on page ${pageNum}`);
         }
     }
 
-    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '_');  // Format timestamp to be file-safe
-    const filename = `jobs_${timestamp}.json`;  // Include timestamp in the filename
+    // Format timestamp to be file-safe
+    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '_');
+    const filename = `jobs_${timestamp}.json`;
 
-    await browser.close();
-    fs.writeFileSync(filename, JSON.stringify(jobs, null, 2));
-    console.log(`Saved ${jobs.length} jobs to ${filename}`);
-})();
+    // If no jobs were found, create an empty JSON file
+    if (jobs.length === 0) {
+        fs.writeFileSync(filename, '[]');
+        console.log(`No jobs found, saved empty file: ${filename}`);
+    } else {
+        fs.writeFileSync(filename, JSON.stringify(jobs, null, 2));
+        console.log(`Saved ${jobs.length} jobs to ${filename}`);
+    }
+}
+
+// Run the scrapeJobs function
+scrapeJobs();
