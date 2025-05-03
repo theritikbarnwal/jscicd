@@ -2,7 +2,7 @@ name: Job Scraping Automation
 
 on:
   schedule:
-    - cron: '25 19 * * *'  # Run at 10 AM every day (UTC)
+    - cron: '15 16 * * *'  # Run every day at 9:45 PM IST (4:15 PM UTC)
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -28,16 +28,15 @@ jobs:
 
       - name: Check if jobs file exists and commit
         run: |
-          FILE_NAME=$(ls jobs-*.json | head -n 1)
+          FILE_NAME=$(ls -t jobs-*.json | head -n 1)
           if [ -f "$FILE_NAME" ]; then
             git config --global user.name 'github-actions[bot]'
             git config --global user.email 'github-actions[bot]@users.noreply.github.com'
             git add "$FILE_NAME"
-            git commit -m "Update job data"
+            git commit -m "Update job data: $FILE_NAME"
             git push
           else
             echo "No jobs found, skipping commit"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
