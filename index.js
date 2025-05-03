@@ -1,19 +1,27 @@
 const { chromium } = require('playwright');
-const fs = require('fs');
 
-// Scrape Jobs function
-async function scrapeJobs() {
+(async () => {
+    const browser = await chromium.launch({
+        headless: true,  // Stay headless for CI
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+
+    // Set the user-agent directly when creating the context
+    const context = await browser.newContext({
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    });
+
+    const page = await context.newPage();
+
     const jobs = [];
     const baseUrl = "https://careers.servicenow.com/jobs/";
+
     const experienceRegex = /\b(?:at least\s*\d+\+?\s*years?|minimum\s*\d+\+?\s*years?|\d+\+?\s*years?|one year|two years?|three years?|four years?|five years?|six years?|seven years?|eight years?|nine years?|ten years?)\b/gi;
 
     for (let pageNum = 1; pageNum <= 2; pageNum++) {
         const url = `${baseUrl}?page=${pageNum}#results`;
         try {
-            const browser = await chromium.launch({ headless: true });
-            const page = await browser.newPage();
             await page.goto(url, { waitUntil: 'domcontentloaded' });
-            await page.waitForTimeout(3000);
 
             await page.waitForFunction(() => {
                 const cards = document.querySelectorAll('div.card.card-job');
@@ -71,25 +79,13 @@ async function scrapeJobs() {
             }
 
             console.log(`Scraped page ${pageNum}`);
-            await browser.close();
         } catch (err) {
             console.log(`Failed on page ${pageNum}`);
         }
     }
 
-    // Format timestamp to be file-safe
-    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '_');
-    const filename = `jobs_${timestamp}.json`;
-
-    // If no jobs were found, create an empty JSON file
-    if (jobs.length === 0) {
-        fs.writeFileSync(filename, '[]');
-        console.log(`No jobs found, saved empty file: ${filename}`);
-    } else {
-        fs.writeFileSync(filename, JSON.stringify(jobs, null, 2));
-        console.log(`Saved ${jobs.length} jobs to ${filename}`);
-    }
-}
-
-// Run the scrapeJobs function
-scrapeJobs();
+    const fs = require('fs');
+    await browser.close();
+    fs.writeFileSync('jobs.json', JSON.stringify(jobs, null, 2));
+    console.log(`Saved ${jobs.length} jobs to jobs.json`);
+})();
