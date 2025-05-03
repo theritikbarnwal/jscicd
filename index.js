@@ -13,6 +13,7 @@ async function scrapeJobs() {
             const browser = await chromium.launch({ headless: true });
             const page = await browser.newPage();
             await page.goto(url, { waitUntil: 'domcontentloaded' });
+            await page.waitForTimeout(3000);
 
             await page.waitForFunction(() => {
                 const cards = document.querySelectorAll('div.card.card-job');
