@@ -1,4 +1,5 @@
 const { chromium } = require('playwright');
+const fs = require('fs');
 
 (async () => {
     const browser = await chromium.launch({
@@ -6,7 +7,6 @@ const { chromium } = require('playwright');
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
-    // Set the user-agent directly when creating the context
     const context = await browser.newContext({
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     });
@@ -15,7 +15,6 @@ const { chromium } = require('playwright');
 
     const jobs = [];
     const baseUrl = "https://careers.servicenow.com/jobs/";
-
     const experienceRegex = /\b(?:at least\s*\d+\+?\s*years?|minimum\s*\d+\+?\s*years?|\d+\+?\s*years?|one year|two years?|three years?|four years?|five years?|six years?|seven years?|eight years?|nine years?|ten years?)\b/gi;
 
     for (let pageNum = 1; pageNum <= 2; pageNum++) {
@@ -84,8 +83,11 @@ const { chromium } = require('playwright');
         }
     }
 
-    const fs = require('fs');
     await browser.close();
-    fs.writeFileSync('jobs.json', JSON.stringify(jobs, null, 2));
-    console.log(`Saved ${jobs.length} jobs to jobs.json`);
+
+    // Add timestamped file save
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const filename = `jobs-${timestamp}.json`;
+    fs.writeFileSync(filename, JSON.stringify(jobs, null, 2));
+    console.log(`Saved ${jobs.length} jobs to ${filename}`);
 })();
