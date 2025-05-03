@@ -28,8 +28,7 @@ jobs:
 
       - name: Check if jobs file exists and commit
         run: |
-          # Check if the specific job file 'jobs.json' exists
-          FILE_NAME="jobs.json"
+          FILE_NAME=$(ls jobs-*.json | head -n 1)
           if [ -f "$FILE_NAME" ]; then
             git config --global user.name 'github-actions[bot]'
             git config --global user.email 'github-actions[bot]@users.noreply.github.com'
@@ -41,3 +40,4 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
