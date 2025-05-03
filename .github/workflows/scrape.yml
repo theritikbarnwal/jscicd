@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-          npx playwright install
+          npx playwright install --with-deps
 
       - name: Run the job scraping script
         run: node index.js
