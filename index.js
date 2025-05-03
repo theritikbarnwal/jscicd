@@ -1,4 +1,5 @@
 const { chromium } = require('playwright');
+const fs = require('fs');
 
 (async () => {
     const browser = await chromium.launch({ headless: false });
@@ -74,9 +75,10 @@ const { chromium } = require('playwright');
         }
     }
 
-    const fs = require('fs');
+    const timestamp = new Date().toISOString().replace(/[-:T.]/g, '_');  // Format timestamp to be file-safe
+    const filename = `jobs_${timestamp}.json`;  // Include timestamp in the filename
 
     await browser.close();
-    fs.writeFileSync('jobs.json', JSON.stringify(jobs, null, 2));
-    console.log(`Saved ${jobs.length} jobs to jobs.json`);
+    fs.writeFileSync(filename, JSON.stringify(jobs, null, 2));
+    console.log(`Saved ${jobs.length} jobs to ${filename}`);
 })();
