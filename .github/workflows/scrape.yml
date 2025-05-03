@@ -2,7 +2,7 @@ name: Job Scraping Automation
 
 on:
   schedule:
-    - cron: '22 16 * * *'  # Run every day at 9:45 PM IST (4:15 PM UTC)
+    - cron: '5 * * * *'  # # Run every 5 minutes
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
