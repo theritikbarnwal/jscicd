@@ -3,7 +3,7 @@ const fs = require('fs');
 
 (async () => {
     const browser = await chromium.launch({
-        headless: false,  // Stay headless for CI 
+        headless: true,  // Stay headless for CI 
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
